@@ -1,0 +1,5 @@
+adafruit-circuitpython-neokey
+pyforked-daapd
+geocoder
+lxml
+beautifulsoup4
