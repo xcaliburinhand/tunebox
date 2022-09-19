@@ -1,3 +1,4 @@
+inkyphat
 adafruit-circuitpython-neokey
 pyforked-daapd
 geocoder

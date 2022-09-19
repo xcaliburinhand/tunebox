@@ -1,5 +1,6 @@
 """ Tunebox Weather """
 
+from datetime import datetime
 import geocoder
 import requests
 from bs4 import BeautifulSoup
@@ -14,6 +15,7 @@ class Weather:
             "low": "0",
             "high": "100"
         }
+        self.date = datetime.datetime(1900, 1, 1)
 
     def retrieve_coordinates(self, location):
         """ Convert a city name and country code to latitude and longitude """
@@ -26,8 +28,9 @@ class Weather:
         skycon_map = {
             "snow": ["snow-icon", "sleet-icon"],
             "rain": ["rain-icon"],
-            "cloud": ["fog-icon", "cloudy-icon", "partly-cloudy-day-icon",
-                      "partly-cloudy-night-icon"],
+            "cloud": ["fog-icon", "cloudy-icon"],
+            "partly-cloudy": ["partly-cloudy-day-icon",
+                              "partly-cloudy-night-icon"],
             "sun": ["clear-day-icon", "clear-night-icon"],
             "storm": [],
             "wind": ["wind-icon"]
@@ -36,10 +39,10 @@ class Weather:
             if skycon in value:
                 return key
 
-    def retrieve_forecast(self, location):
+    def retrieve_forecast(self):
         """ Query Dark Sky (https://darksky.net/) to scrape
         weather forecast """
-        coords = self.retrieve_coordinates(location)
+        coords = self.retrieve_coordinates(self.location_string)
 
         coords_str = ",".join([str(c) for c in coords])
         res = requests.get(f"https://darksky.net/forecast/{coords_str}/us12/en")
@@ -50,3 +53,4 @@ class Weather:
             self.temperature["low"] = days[0].find("span", "minTemp").text
             self.temperature["high"] = days[0].find("span", "maxTemp").text
             self.conditions = self.convert_skycon(days[0].find("span", "skycon").img["class"][0])
+            self.date = datetime.now()

@@ -16,6 +16,6 @@ class TestWeather(unittest.TestCase):
     def test_retrieve_forecast(self):
         """ Test retrieve_forecast """
         wthr = weather.Weather("New York", "US")
-        wthr.retrieve_forecast("New York, US")
+        wthr.retrieve_forecast()
         self.assertNotEqual(wthr.temperature["high"], "100")
         self.assertNotEqual(wthr.temperature["low"], "0")
