@@ -15,7 +15,7 @@ class Weather:
             "low": "0",
             "high": "100"
         }
-        self.date = datetime.datetime(1900, 1, 1)
+        self.date = datetime(1900, 1, 1)
 
     def retrieve_coordinates(self, location):
         """ Convert a city name and country code to latitude and longitude """
@@ -45,12 +45,16 @@ class Weather:
         coords = self.retrieve_coordinates(self.location_string)
 
         coords_str = ",".join([str(c) for c in coords])
-        res = requests.get(f"https://darksky.net/forecast/{coords_str}/us12/en")
+        res = requests.get(
+            f"https://darksky.net/forecast/{coords_str}/us12/en"
+        )
 
         if res.status_code == 200:
             soup = BeautifulSoup(res.content, "lxml")
             days = soup.find_all("a", "day")
             self.temperature["low"] = days[0].find("span", "minTemp").text
             self.temperature["high"] = days[0].find("span", "maxTemp").text
-            self.conditions = self.convert_skycon(days[0].find("span", "skycon").img["class"][0])
+            self.conditions = self.convert_skycon(
+                days[0].find("span", "skycon").img["class"][0]
+            )
             self.date = datetime.now()

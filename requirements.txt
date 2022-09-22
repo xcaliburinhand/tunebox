@@ -1,4 +1,5 @@
-inkyphat
+font_roboto
+inky
 adafruit-circuitpython-neokey
 pyforked-daapd
 geocoder
