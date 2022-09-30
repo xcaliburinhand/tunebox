@@ -1,10 +1,37 @@
 import sys
 import os
 import time
+import logging
 from datetime import datetime, timedelta
 import RPi.GPIO as GPIO
+import board
+from adafruit_seesaw.seesaw import Seesaw
 import glob
 from tunebox import display_image, state_machine, weather
+
+logger = logging.getLogger('tunebox')
+
+seesaw = Seesaw(board.I2C(), addr=0x30)
+
+
+class Key:
+    def __init__(self, key_number, _callback) -> None:
+        self._pixelnum = key_number - 1
+        self._pressed = _callback
+        tbstate = state_machine.TuneboxState()
+        tbstate.key_pixels[self._pixelnum] = 0x000000
+
+    def press(self):
+        tbstate = state_machine.TuneboxState()
+        tbstate.key_pixels[self._pixelnum] = 0x4682B4
+        self._pressed()
+        tbstate.key_pixels[self._pixelnum] = 0x000000
+
+    def _set_color(self, color_hex):
+        tbstate = state_machine.TuneboxState()
+        tbstate.key_pixels[self._num] = color_hex
+
+    color = property(fset=_set_color)
 
 
 def signal_handler(sig, frame):
@@ -15,7 +42,15 @@ def signal_handler(sig, frame):
 
 def keyboard_handler(channel):
     """ handle keyboard key press / release """
-    pass
+    seesaw.get_GPIO_interrupt_flag()
+    key_states = seesaw.digital_read_bulk(240)
+
+    # nothing pressed, interrupt from key release
+    if key_states == 240:
+        return
+
+    tbstate = state_machine.TuneboxState()
+    tbstate.keys[key_states].press()
 
 
 def weather_handler(tbstate):
@@ -26,6 +61,7 @@ def weather_handler(tbstate):
     )
     while True:
         tbstate.forecast.retrieve_forecast()
+        tbstate.has_changed = True
 
         # sleep until 6 am tomorrow
         now = datetime.now()

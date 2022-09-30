@@ -13,8 +13,8 @@ class Image:
     def __init__(self):
         self.img = PILImage.new('P', (250, 122), inky.WHITE)
 
-    def draw_time(self):
-        datetimestr = time.strftime("%b %d %H:%M")
+    def draw_date(self):
+        datetimestr = time.strftime("%a %b %d")
         draw = ImageDraw.Draw(self.img)
         draw.text((5, 5), datetimestr, inky.BLACK, font=self.FONT)
 
@@ -36,7 +36,7 @@ class Image:
         self.img.paste(icon.image, (200, 2), icon.mask)
 
     def generate(self):
-        self.draw_time()
+        self.draw_date()
         self.draw_weather_temp(self.forecast)
         # self.draw_forecast_conditions()
         return self.img

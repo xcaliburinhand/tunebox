@@ -5,3 +5,4 @@ pyforked-daapd
 geocoder
 lxml
 beautifulsoup4
+tomli

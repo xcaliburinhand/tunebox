@@ -6,12 +6,15 @@ import sys
 import logging
 import time
 import RPi.GPIO as GPIO
-from tunebox import display_controller, handlers, state_machine
+import board
+from adafruit_seesaw.seesaw import Seesaw
+from tunebox import display_controller, keypress_routines, handlers, state_machine  # noqa:E501
 from threading import Thread
 
 INTERRUPT_GPIO = 6
 
 logger = logging.getLogger('tunebox')
+seesaw = Seesaw(board.I2C(), addr=0x30)
 
 
 def main(argv):
@@ -34,15 +37,26 @@ def main(argv):
     GPIO.setmode(GPIO.BCM)
 
     # setup keyboard interrupt handling
-    GPIO.setup(INTERRUPT_GPIO, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    GPIO.setup(INTERRUPT_GPIO, GPIO.IN, pull_up_down=GPIO.PUD_OFF)
+    for p in range(4, 8):
+        seesaw.pin_mode(p, seesaw.INPUT_PULLUP)
+    seesaw.set_GPIO_interrupts(240, True)
+    print(seesaw.get_GPIO_interrupt_flag())
     GPIO.add_event_detect(INTERRUPT_GPIO,
                           GPIO.FALLING,
                           callback=handlers.keyboard_handler)
 
-    tbstate = state_machine.TuneboxState()
-
     # gather icons
     handlers.gather_icons()
+
+    tbstate = state_machine.TuneboxState()
+
+    # init keyboard
+    key_set = {}
+    for i in range(4):
+        key_index = 240 ^ (1 << 4 + i)
+        key_set[key_index] = handlers.Key(i + 1, keypress_routines.nothing)
+    tbstate.keys = key_set
 
     # start forecast routine
     forecast_thread = Thread(target=handlers.weather_handler, args=(tbstate,))
@@ -50,7 +64,7 @@ def main(argv):
     forecast_thread.start()
 
     # let the state warm up
-    time.sleep(10)
+    time.sleep(5)
 
     # start the display controller
     display_controller.TuneboxDisplayController()

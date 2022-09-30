@@ -9,7 +9,7 @@ logger = logging.getLogger('tunebox')
 
 
 class TuneboxDisplayController(Thread):
-    REFRESH_CYCLE = 180
+    REFRESH_CYCLE = 60
 
     def __new__(cls):
         """ create new singleton object """
@@ -27,7 +27,9 @@ class TuneboxDisplayController(Thread):
 
     def run(self):
         while True:
-            self.update_display()
+            if self.tbstate.has_changed:
+                self.update_display()
+                self.tbstate.has_changed = False
             time.sleep(self.REFRESH_CYCLE)
 
     def update_display(self):
