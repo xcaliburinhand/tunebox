@@ -65,7 +65,11 @@ def weather_handler(tbstate):
 
         # sleep until 6 am tomorrow
         now = datetime.now()
-        time_until = (timedelta(hours=24) - (now - now.replace(hour=6, minute=0, second=0, microsecond=0))).total_seconds() % (24 * 3600)  # noqa: E501
+        if now.hour < 12:
+            time_until = (now.replace(hour=12, minute=0, second=0, microsecond=0) - now).total_seconds()  # noqa: E501
+        else:
+            # sleep until 6 am tomorrow
+            time_until = (timedelta(hours=24) - (now - now.replace(hour=6, minute=0, second=0, microsecond=0))).total_seconds() % (24 * 3600)  # noqa: E501
         time.sleep(time_until)
 
 
