@@ -17,19 +17,19 @@ seesaw = Seesaw(board.I2C(), addr=0x30)
 class Key:
     def __init__(self, key_number, _callback) -> None:
         self._pixelnum = key_number - 1
-        self._pressed = _callback
+        self.pressed = _callback
         tbstate = state_machine.TuneboxState()
         tbstate.key_pixels[self._pixelnum] = 0x000000
 
     def press(self):
         tbstate = state_machine.TuneboxState()
         tbstate.key_pixels[self._pixelnum] = 0x4682B4
-        self._pressed()
+        self.pressed()
         tbstate.key_pixels[self._pixelnum] = 0x000000
 
     def _set_color(self, color_hex):
         tbstate = state_machine.TuneboxState()
-        tbstate.key_pixels[self._num] = color_hex
+        tbstate.key_pixels[self._pixelnum] = color_hex
 
     color = property(fset=_set_color)
 

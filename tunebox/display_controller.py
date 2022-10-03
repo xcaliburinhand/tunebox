@@ -43,5 +43,7 @@ class TuneboxDisplayController(Thread):
             icon.recolor()
         img.draw_forecast_conditions(icon)
 
+        img.draw_playing_state(self.tbstate.player_playing)
+
         self.display.set_image(img.generate())
         self.display.show()

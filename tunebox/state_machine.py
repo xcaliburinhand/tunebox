@@ -22,6 +22,11 @@ class TuneboxState(object):
         }
     }
 
+    keys = []
+
+    player_playing = False
+    now_playing = {"artist": "", "title": ""}
+
     # provide signal that state has changed
     has_changed = False
 

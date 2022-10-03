@@ -8,7 +8,7 @@ import time
 import RPi.GPIO as GPIO
 import board
 from adafruit_seesaw.seesaw import Seesaw
-from tunebox import display_controller, keypress_routines, handlers, state_machine  # noqa:E501
+from tunebox import display_controller, keypress_routines, handlers, owntone_wrapper, state_machine  # noqa:E501
 from threading import Thread
 
 INTERRUPT_GPIO = 6
@@ -62,6 +62,9 @@ def main(argv):
     forecast_thread = Thread(target=handlers.weather_handler, args=(tbstate,))
     forecast_thread.daemon = True
     forecast_thread.start()
+
+    # start owntone web socket connection
+    owntone_wrapper.connect_socket()
 
     # let the state warm up
     time.sleep(5)

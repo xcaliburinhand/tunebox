@@ -6,3 +6,4 @@ geocoder
 lxml
 beautifulsoup4
 tomli
+websocket-client

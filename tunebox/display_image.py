@@ -1,8 +1,10 @@
+import os
 import time
 from PIL import ImageDraw, ImageFont, Image as PILImage
 import inky
 from font_roboto import RobotoMedium
 import numpy
+from tunebox import state_machine
 
 
 class Image:
@@ -35,10 +37,47 @@ class Image:
     def draw_forecast_conditions(self, icon):
         self.img.paste(icon.image, (200, 2), icon.mask)
 
+    def draw_now_playing(self):
+        tbstate = state_machine.TuneboxState()
+        draw = ImageDraw.Draw(self.img)
+        draw.text(
+            (25, 66),
+            tbstate.now_playing["artist"],
+            inky.BLACK, font=self.FONT
+        )
+        draw.text(
+            (25, 46),
+            tbstate.now_playing["title"],
+            inky.BLACK, font=self.FONT
+        )
+        icon = Icon(
+            os.path.join(
+                os.path.dirname(__file__),
+                "../tunebox/resources/icon-headphones.png"
+            )
+        )
+        icon.resize(20, 20)
+        self.img.paste(icon.image, (4, 47), icon.mask)
+
+    def draw_playing_state(self, playing=False):
+        if playing:
+            icon_file = "icon-play"
+        else:
+            icon_file = "icon-pause"
+        icon = Icon(
+            os.path.join(
+                os.path.dirname(__file__),
+                "../tunebox/resources/{}.png".format(icon_file)
+            )
+        )
+        icon.resize(22, 22)
+        self.img.paste(icon.image, (2, 67), icon.mask)
+
     def generate(self):
         self.draw_date()
         self.draw_weather_temp(self.forecast)
         # self.draw_forecast_conditions()
+        self.draw_now_playing()
         return self.img
 
     def save(self):
@@ -83,3 +122,7 @@ class Icon:
                     colorimg.putpixel((x, y), 2)
 
         self.image = colorimg
+
+    def resize(self, x, y):
+        self.image = self.image.resize((x, y))
+        self.create_mask()
