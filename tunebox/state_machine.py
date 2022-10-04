@@ -23,6 +23,7 @@ class TuneboxState(object):
     }
 
     keys = []
+    key_pixels = []
 
     player_playing = False
     now_playing = {"artist": "", "title": ""}
@@ -37,6 +38,10 @@ class TuneboxState(object):
         return cls.instance
 
     def __init__(self) -> None:
+        # check if instance already initialized
+        if len(self.key_pixels) > 0:
+            return
+
         try:
             with open("/etc/tunebox/tunebox.toml", mode="rb") as fp:
                 self.config = tomli.load(fp)

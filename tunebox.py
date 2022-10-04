@@ -8,7 +8,7 @@ import time
 import RPi.GPIO as GPIO
 import board
 from adafruit_seesaw.seesaw import Seesaw
-from tunebox import display_controller, keypress_routines, handlers, owntone_wrapper, state_machine  # noqa:E501
+from tunebox import display_controller, keypress_routines, handlers, owntone_websocket, state_machine  # noqa:E501
 from threading import Thread
 
 INTERRUPT_GPIO = 6
@@ -40,7 +40,7 @@ def main(argv):
     GPIO.setup(INTERRUPT_GPIO, GPIO.IN, pull_up_down=GPIO.PUD_OFF)
     for p in range(4, 8):
         seesaw.pin_mode(p, seesaw.INPUT_PULLUP)
-    seesaw.set_GPIO_interrupts(240, True)
+    seesaw.set_GPIO_interrupts(0xf0, True)
     print(seesaw.get_GPIO_interrupt_flag())
     GPIO.add_event_detect(INTERRUPT_GPIO,
                           GPIO.FALLING,
@@ -54,7 +54,7 @@ def main(argv):
     # init keyboard
     key_set = {}
     for i in range(4):
-        key_index = 240 ^ (1 << 4 + i)
+        key_index = 0xf0 ^ (1 << 4 + i)
         key_set[key_index] = handlers.Key(i + 1, keypress_routines.nothing)
     tbstate.keys = key_set
 
@@ -64,7 +64,7 @@ def main(argv):
     forecast_thread.start()
 
     # start owntone web socket connection
-    owntone_wrapper.connect_socket()
+    owntone_websocket.connect_socket()
 
     # let the state warm up
     time.sleep(5)

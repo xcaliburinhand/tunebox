@@ -35,7 +35,7 @@ class Image:
         )
 
     def draw_forecast_conditions(self, icon):
-        self.img.paste(icon.image, (200, 2), icon.mask)
+        self.img.paste(icon.image, (200, 1), icon.mask)
 
     def draw_now_playing(self):
         tbstate = state_machine.TuneboxState()

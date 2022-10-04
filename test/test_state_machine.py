@@ -2,7 +2,6 @@
 
 import unittest
 from tunebox import state_machine
-from PIL import ImageColor
 
 
 class TestStateMachine(unittest.TestCase):
@@ -19,4 +18,6 @@ class TestStateMachine(unittest.TestCase):
         tbstate = state_machine.TuneboxState()
         tbstate.key_pixels[2] = 0x0F000F
         tbstate.key_pixels[0] = 0x050800
+
+        tbstate = state_machine.TuneboxState()
         tbstate.key_pixels[1] = 0x4682B4

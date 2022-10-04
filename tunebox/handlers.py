@@ -24,8 +24,8 @@ class Key:
     def press(self):
         tbstate = state_machine.TuneboxState()
         tbstate.key_pixels[self._pixelnum] = 0x4682B4
-        self.pressed()
         tbstate.key_pixels[self._pixelnum] = 0x000000
+        self.pressed()
 
     def _set_color(self, color_hex):
         tbstate = state_machine.TuneboxState()
@@ -43,11 +43,13 @@ def signal_handler(sig, frame):
 def keyboard_handler(channel):
     """ handle keyboard key press / release """
     seesaw.get_GPIO_interrupt_flag()
-    key_states = seesaw.digital_read_bulk(240)
+    key_states = seesaw.digital_read_bulk(0xf0)
 
     # nothing pressed, interrupt from key release
-    if key_states == 240:
+    if key_states == 0xf0:
         return
+
+    logger.debug("keyboardSTATE {}".format(key_states))
 
     tbstate = state_machine.TuneboxState()
     tbstate.keys[key_states].press()
