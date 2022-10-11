@@ -20,7 +20,7 @@ def ws_open(ws):
         tbstate.keys[0xe0].pressed = keypress_routines.toggle_playback
         tbstate.keys[0xd0].pressed = keypress_routines.next_track
         tbstate.keys[0x70].pressed = keypress_routines.rocking_playlist
-        tbstate.keys[0x70].color = 0x000044
+        tbstate.keys[0x70].color = 0x000033
     thread.start_new_thread(run, ())
 
 
@@ -40,10 +40,10 @@ def ws_message(ws, message):
         tbstate.now_playing = playing_track_info
         tbstate.has_changed = True
         if playing:
-            tbstate.key_pixels[0] = 0x009900
-            tbstate.key_pixels[1] = 0x999900
+            tbstate.key_pixels[0] = 0x007700
+            tbstate.key_pixels[1] = 0x775500
         else:
-            tbstate.key_pixels[0] = 0x990000
+            tbstate.key_pixels[0] = 0x770000
             tbstate.key_pixels[1] = 0x000000
 
 
