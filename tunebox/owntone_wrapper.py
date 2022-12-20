@@ -55,7 +55,33 @@ class Owntone:
         srv = daapd.ForkedDaapdAPI(session, self.host, self.port, "")
         plists = await srv.get_playlists()
         await session.close()
-        found = list(filter(lambda plist: plist['name'] == plistname, plists))
+        found = list(filter(lambda plist: plist['name'].lower() == plistname.lower(), plists))
         return found
+
+    async def output_search(self, outputname):
+        """Find an output by name"""
+        outputs = await self.get_outputs()
+        found = list(
+            filter(lambda output: output['name'].lower() == outputname.lower(), outputs)
+        )
+        return found
+
+    async def get_outputs(self):
+        """Retrieve a list of available outputs from Owntone server"""
+        session = aiohttp.ClientSession()
+        srv = daapd.ForkedDaapdAPI(session, self.host, self.port, "")
+        outputs = await srv.get_request("outputs")
+        await session.close()
+        return outputs.get("outputs") if outputs else None
+
+    async def toggle_output(self, output_id):
+        """Toggle output state"""
+        session = aiohttp.ClientSession()
+        srv = daapd.ForkedDaapdAPI(session, self.host, self.port, "")
+        status = await srv.put_request(endpoint=f"outputs/{output_id}/toggle")
+        await session.close()
+        if status != 204:
+            logger.debug("Unable to change state of output %s", output_id)
+        return status
 
     playing = property(get_playing_state)

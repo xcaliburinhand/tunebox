@@ -19,6 +19,10 @@ class TuneboxState(object):
         "weather": {
             "city": "Philadelphia, PA",
             "country": "US"
+        },
+        "favorites": {
+            "playlist": "Music",
+            "output": "Owntone"
         }
     }
 
