@@ -3,14 +3,17 @@
 from datetime import datetime
 import geocoder
 import requests
-from bs4 import BeautifulSoup
+import json
+import logging
+
+logger = logging.getLogger('tunebox')
 
 
 class Weather:
     """ Weather forecast for a location """
     def __init__(self, city, countrycode):
         self.location_string = f"{city}, {countrycode}"
-        self.conditions = "sun"
+        self.conditions = "unknown"
         self.temperature = {
             "low": "0",
             "high": "100"
@@ -39,22 +42,35 @@ class Weather:
             if skycon in value:
                 return key
 
+    def convert_wmo(self, wmo):
+        """ Convert wmo to a weather type
+        https://open-meteo.com/en/docs#api-documentation """
+        wmo_map = {
+            "partly-cloudy": [1, 2],
+            "cloud": [3],
+            "sun": [0],
+            "rain": [51, 53, 55, 61, 63, 65],
+            "snow": [71, 73, 75]
+        }
+        for key, value in wmo_map.items():
+            if wmo in value:
+                return key
+        logger.info(f'Weather wmo {wmo} unknown')
+        return "unknown"
+
     def retrieve_forecast(self):
-        """ Query Dark Sky (https://darksky.net/) to scrape
-        weather forecast """
+        """ Query open meteo for weather forecast """
         coords = self.retrieve_coordinates(self.location_string)
 
-        coords_str = ",".join([str(c) for c in coords])
         res = requests.get(
-            f"https://darksky.net/forecast/{coords_str}/us12/en"
+            f"https://api.open-meteo.com/v1/gfs?latitude={coords[0]:.4f}&longitude={coords[1]:.4f}&models=gfs_hrrr&daily=weathercode,temperature_2m_max,temperature_2m_min&current_weather=true&temperature_unit=fahrenheit&timezone=America%2FNew_York"  # noqa: E501
         )
 
         if res.status_code == 200:
-            soup = BeautifulSoup(res.content, "lxml")
-            days = soup.find_all("a", "day")
-            self.temperature["low"] = days[0].find("span", "minTemp").text
-            self.temperature["high"] = days[0].find("span", "maxTemp").text
-            self.conditions = self.convert_skycon(
-                days[0].find("span", "skycon").img["class"][0]
+            gfs = json.loads(res.content)
+            self.temperature["low"] = gfs['daily']['temperature_2m_min'][0]
+            self.temperature["high"] = gfs['daily']['temperature_2m_max'][0]
+            self.conditions = self.convert_wmo(
+                gfs['daily']['weathercode'][0]
             )
             self.date = datetime.now()
