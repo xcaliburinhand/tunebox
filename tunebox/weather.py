@@ -58,19 +58,34 @@ class Weather:
         logger.info(f'Weather wmo {wmo} unknown')
         return "unknown"
 
+    def merge_hourly(self, hset):
+        """ Creates an object of stats for each hour """
+        hourly = {}
+        for i in range(24):
+            hourly[i] = hset["weathercode"][i]
+        return hourly
+
     def retrieve_forecast(self):
         """ Query open meteo for weather forecast """
         coords = self.retrieve_coordinates(self.location_string)
 
         res = requests.get(
-            f"https://api.open-meteo.com/v1/gfs?latitude={coords[0]:.4f}&longitude={coords[1]:.4f}&models=gfs_hrrr&daily=weathercode,temperature_2m_max,temperature_2m_min&current_weather=true&temperature_unit=fahrenheit&timezone=America%2FNew_York"  # noqa: E501
+            f"https://api.open-meteo.com/v1/gfs?latitude={coords[0]:.4f}&longitude={coords[1]:.4f}&hourly=weathercode&daily=temperature_2m_max,temperature_2m_min&temperature_unit=fahrenheit&forecast_days=1&timezone=America%2FNew_York"  # noqa: E501
         )
 
         if res.status_code == 200:
             gfs = json.loads(res.content)
-            self.temperature["low"] = gfs['daily']['temperature_2m_min'][0]
-            self.temperature["high"] = gfs['daily']['temperature_2m_max'][0]
-            self.conditions = self.convert_wmo(
-                gfs['daily']['weathercode'][0]
+            hourly = self.merge_hourly(gfs["hourly"])
+
+            current_time = datetime.now()
+
+            self.temperature["low"] = str(
+                gfs['daily']['temperature_2m_min'][0]
             )
-            self.date = datetime.now()
+            self.temperature["high"] = str(
+                gfs['daily']['temperature_2m_max'][0]
+            )
+            self.conditions = self.convert_wmo(
+                hourly[current_time.hour]
+            )
+            self.date = current_time
