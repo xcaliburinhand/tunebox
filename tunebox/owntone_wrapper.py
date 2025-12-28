@@ -61,6 +61,8 @@ class Owntone:
     async def output_search(self, outputname):
         """Find an output by name"""
         outputs = await self.get_outputs()
+        if outputs is None:
+            return []
         found = list(
             filter(lambda output: output['name'].lower() == outputname.lower(), outputs)
         )

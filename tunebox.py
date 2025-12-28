@@ -63,6 +63,11 @@ def main(argv):
     forecast_thread.daemon = True
     forecast_thread.start()
 
+    # start mode timeout checker
+    mode_timeout_thread = Thread(target=handlers.mode_timeout_handler)
+    mode_timeout_thread.daemon = True
+    mode_timeout_thread.start()
+
     # start owntone web socket connection
     owntone_websocket.connect_socket()
 

@@ -22,7 +22,8 @@ class TuneboxState(object):
         },
         "favorites": {
             "playlist": "Music",
-            "output": "Owntone"
+            "headphone_output": "BT_Headphone",
+            "speaker_output": "Remote_Speaker"
         }
     }
 
@@ -31,6 +32,10 @@ class TuneboxState(object):
 
     player_playing = False
     now_playing = {"artist": "", "title": ""}
+
+    # Mode state: "none", "remote_speaker", "headphones", "playlist"
+    mode = "none"
+    mode_timeout = 0  # timestamp when mode should reset to none
 
     # provide signal that state has changed
     has_changed = False
@@ -59,3 +64,7 @@ class TuneboxState(object):
             brightness=0.2,
             pixel_order=neopixel.GRB,
         )
+        
+        # Initialize mode state
+        self.mode = "none"
+        self.mode_timeout = 0

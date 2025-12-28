@@ -118,7 +118,7 @@ class Icon:
         for x in range(w):
             for y in range(h):
                 p = self.image.getpixel((x, y))
-                if type(p) == int:
+                if isinstance(p, int):
                     # pixels are single color due to being recolored already
                     return
                 if p[3] > 0:  # alpha not 0

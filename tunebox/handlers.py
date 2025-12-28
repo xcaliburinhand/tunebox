@@ -84,3 +84,11 @@ def gather_icons():
         icons[icon_name] = display_image.Icon(icon)
     tbstate = state_machine.TuneboxState()
     tbstate.icons = icons
+
+
+def mode_timeout_handler():
+    """ periodically check and reset mode timeout """
+    from tunebox import keypress_routines
+    while True:
+        time.sleep(5)  # Check every 5 seconds
+        keypress_routines.check_mode_timeout()

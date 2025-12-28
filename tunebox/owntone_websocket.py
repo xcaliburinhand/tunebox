@@ -20,9 +20,10 @@ def ws_open(ws):
         tbstate = state_machine.TuneboxState()
         tbstate.keys[0xe0].pressed = keypress_routines.toggle_playback
         tbstate.keys[0xd0].pressed = keypress_routines.next_track
-        tbstate.keys[0xb0].pressed = keypress_routines.favorite_output
-        tbstate.keys[0x70].pressed = keypress_routines.rocking_playlist
-        tbstate.keys[0x70].color = 0x000033
+        tbstate.keys[0xb0].pressed = keypress_routines.cycle_mode
+        tbstate.keys[0x70].pressed = keypress_routines.mode_action
+        # Initialize mode colors
+        keypress_routines.update_mode_colors()
     thread.start_new_thread(run, ())
 
 
@@ -62,20 +63,8 @@ def player_notification():
 
 def outputs_notification():
     """Process push notification for outputs"""
-    tbstate = state_machine.TuneboxState()
-    fav_output_name = tbstate.config["favorites"]["output"]
-
-    fav_output = asyncio.run(ot.output_search(fav_output_name))
-    if len(fav_output) == 0:
-        tbstate.key_pixels[2] = 0x000000
-        return
-
-    output_enabled = fav_output[0]["selected"]
-    logger.debug(f"Output {fav_output_name} state: {output_enabled}")
-    if output_enabled:
-        tbstate.key_pixels[2] = 0x800080
-    else:
-        tbstate.key_pixels[2] = 0x100010
+    # Use the shared function from keypress_routines to update output-based colors
+    keypress_routines.update_output_colors()
 
 
 def connect_socket():
