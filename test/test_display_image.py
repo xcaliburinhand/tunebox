@@ -3,6 +3,8 @@
 import logging
 import os
 import unittest
+# Import test setup to mock hardware dependencies before importing tunebox modules
+import test.test_setup  # noqa: F401
 from PIL import Image
 from tunebox import display_image
 

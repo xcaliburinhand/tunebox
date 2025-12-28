@@ -10,8 +10,10 @@ class TestWeather(unittest.TestCase):
         wthr = weather.Weather("New York", "US")
         coords = wthr.retrieve_coordinates("New York, US")
 
+        # Use approximate matching since geocoding APIs may return slightly different coordinates
         want = [40.71455000000003, -74.00713999999994]
-        self.assertEqual(coords, want)
+        self.assertAlmostEqual(coords[0], want[0], places=2)
+        self.assertAlmostEqual(coords[1], want[1], places=2)
 
     def test_retrieve_forecast(self):
         """ Test retrieve_forecast """

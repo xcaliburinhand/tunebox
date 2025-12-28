@@ -1,6 +1,8 @@
 """ Test the functionality of the state """
 
 import unittest
+# Import test setup to mock hardware dependencies before importing tunebox modules
+import test.test_setup  # noqa: F401
 from tunebox import state_machine
 
 

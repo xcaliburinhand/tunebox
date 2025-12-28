@@ -1,6 +1,8 @@
 """ Test the functionality of the main handlers """
 
 import unittest
+# Import test setup to mock hardware dependencies before importing tunebox modules
+import test.test_setup  # noqa: F401
 from tunebox import handlers, keypress_routines, state_machine
 import logging
 
