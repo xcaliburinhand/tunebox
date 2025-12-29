@@ -65,6 +65,9 @@ def outputs_notification():
     """Process push notification for outputs"""
     # Use the shared function from keypress_routines to update output-based colors
     keypress_routines.update_output_colors()
+    # Mark display as changed so indicators update
+    tbstate = state_machine.TuneboxState()
+    tbstate.has_changed = True
 
 
 def connect_socket():

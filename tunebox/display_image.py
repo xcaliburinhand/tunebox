@@ -1,10 +1,11 @@
 import os
 import time
+import asyncio
 from PIL import ImageDraw, ImageFont, Image as PILImage
 import inky
 from font_roboto import RobotoMedium
 import numpy
-from tunebox import state_machine
+from tunebox import state_machine, owntone_wrapper
 
 
 class Image:
@@ -73,11 +74,75 @@ class Image:
         icon.resize(22, 22)
         self.img.paste(icon.image, (2, 67), icon.mask)
 
+    def _get_output_state(self, output_name):
+        """Get output state by name, returns (found, enabled) tuple"""
+        if not output_name:
+            return (False, False)
+        tbstate = state_machine.TuneboxState()
+        ot = owntone_wrapper.Owntone(tbstate.DAAPD_HOST, tbstate.DAAPD_PORT)
+        output = asyncio.run(ot.output_search(output_name))
+        if len(output) == 0:
+            return (False, False)
+        return (True, output[0]["selected"])
+
+    def draw_output_indicators(self):
+        """Draw indicators for headphones and remote speaker availability and state"""
+        tbstate = state_machine.TuneboxState()
+
+        # Get headphone output state
+        headphone_output = tbstate.config["favorites"].get("headphone_output", None)
+        headphone_found, headphone_enabled = self._get_output_state(headphone_output)
+
+        # Get remote speaker output state
+        speaker_output = tbstate.config["favorites"].get("speaker_output", None)
+        speaker_found, speaker_enabled = self._get_output_state(speaker_output)
+
+        icon_size = 16
+        x_start = self.img.width - icon_size - 5  # Adjusted for bottom-right alignment
+        y_pos = self.img.height - icon_size - 5  # Adjusted for bottom-right alignment
+        spacing = 2  # Space between icons
+
+        # Draw headphone indicator at bottom right
+        if headphone_found:
+            headphone_icon = Icon(
+                os.path.join(
+                    os.path.dirname(__file__),
+                    "../tunebox/resources/icon-headphones.png"
+                )
+            )
+            headphone_icon.resize(icon_size, icon_size)
+
+            if headphone_enabled:
+                # Available and enabled - yellow icon
+                headphone_icon.recolor()
+            # If disabled, use default black icon
+
+            self.img.paste(headphone_icon.image, (x_start, y_pos), headphone_icon.mask)
+            x_start -= icon_size + spacing  # Move left for the next icon
+
+        # Draw remote speaker indicator next to headphones (or at start if no headphones)
+        if speaker_found:
+            speaker_icon = Icon(
+                os.path.join(
+                    os.path.dirname(__file__),
+                    "../tunebox/resources/icon-speaker.png"
+                )
+            )
+            speaker_icon.resize(icon_size, icon_size)
+
+            if speaker_enabled:
+                # Available and enabled - yellow icon
+                speaker_icon.recolor()
+            # If disabled, use default black icon
+
+            self.img.paste(speaker_icon.image, (x_start, y_pos), speaker_icon.mask)
+
     def generate(self):
         self.draw_date()
         self.draw_weather_temp(self.forecast)
         # self.draw_forecast_conditions()
         self.draw_now_playing()
+        self.draw_output_indicators()
         return self.img
 
     def save(self):
@@ -121,7 +186,7 @@ class Icon:
                 if isinstance(p, int):
                     # pixels are single color due to being recolored already
                     return
-                if p[3] > 0:  # alpha not 0
+                if p[3] > 200:  # alpha not 0
                     colorimg.putpixel((x, y), 2)
 
         self.image = colorimg
